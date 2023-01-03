@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import generate_invoice
+from .views import generate_balance_sheet
 
 urlpatterns = [
-    path("invoices/", generate_invoice)
+    path("balance_sheet/", generate_balance_sheet)
 ]

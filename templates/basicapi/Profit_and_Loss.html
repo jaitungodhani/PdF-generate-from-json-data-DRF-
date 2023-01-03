@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+  <title>Profit and Loss</title>
+<style>
+
+
+body {
+  color: #001028;
+  background: #FFFFFF; 
+  font-family: Arial, sans-serif; 
+  font-size: 14px; 
+  font-family: Arial;
+}
+
+header {
+  padding: 10px 0;
+  margin-bottom: 3px;
+}
+
+#logo {
+  text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom: 20px;
+  }
+  
+  
+  
+.second {
+text-align: right;
+margin-right:10px;
+}
+
+
+.first {
+text-align: left;
+margin-left:10px;
+}
+  
+table th {
+color: #5D6975;
+border-bottom: 1px solid black;
+white-space: nowrap;        
+font-weight: normal;
+}
+  
+ 
+.bottom_border {
+border-bottom: 1px solid #C1CED9;
+padding-top:3px;
+}
+
+
+  </style>
+</head>
+
+<body>
+  <header>
+    <div id="logo">
+        <b>PBCIX</b></br>
+        Profit and Loss</br>
+        {{from_date}} - {{to_date}}
+    </div>
+    </header>
+    <hr>
+    <div>
+        <table class="table" style="width:100%">
+            <thead>
+                <tr>
+                    <th scope="col" class="first"></th>
+                    <th scope="col" class="second">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td class="first">Assets</td>
+                    <td class="second"></td>
+                </tr>
+                <tr>
+                    <td class="first">Current Assets</td>
+                    <td class="second"></td>
+                </tr>
+                <tr>
+                    <td class="first">Cash in bank</td>
+                    <td class="second">{{cash_in_bank}}</td>
+                </tr>
+                <tr class="bottom_border">
+                    <td class="first"><b>Total Current Assets</b></td>
+                    <td class="second"><b>{{total_current_assets}}</b></td>  
+                </tr>
+                <tr class="bottom_border">
+                    <td class="first"><b>Total Assets</b></td>
+                    <td class="second"><b>{{total_assets}}</b></td>  
+                </tr>
+            </tbody>
+        </table>
+      </div>
+    <hr>
+    <div>
+        <table class="table" style="width:100%">
+            <tbody>
+                <tr>
+                    <td class="first">Liabilities and shareholder's equity</td>
+                    <td class="second"></td>
+                </tr>
+                <tr>
+                    <td class="first">Shareholders' equity:</td>
+                    <td class="second"></td>
+                </tr>
+                <tr>
+                    <td class="first">Net Income </td>
+                    <td class="second">{{net_income}}</td>
+                </tr>
+                <tr>
+                    <td class="first">Opening Balance Equity </td>
+                    <td class="second">{{opening_balance_equity}}</td>
+                </tr>
+                <tr>
+                    <td class="first">Owner's Loan </td>
+                    <td class="second">{{owner_loan}}</td>
+                </tr>
+                <tr>
+                    <td class="first">Retained Earnings</td>
+                    <td class="second">{{retained_earnings}}</td>
+                </tr>
+                <tr class="bottom_border">
+                    <td class="first"><b>Total shareholders' equity</b></td>
+                    <td class="second"><b>{{total_shareholders_equity}}</b></td>  
+                </tr>
+                <tr class="bottom_border">
+                    <td class="first"><b>Total liabilities and equity</b></td>
+                    <td class="second"><b>{{total_liabilities_and_equity}}</b></td>  
+                </tr>
+            </tbody>
+        </table>
+      </div>
+    <hr>
+</body>
+
+</html>
