@@ -5,16 +5,6 @@ from xhtml2pdf import pisa
 from rest_framework.decorators import api_view
 import uuid
 
-def render_to_pdf(template_src, context_dict={}):
-    template = get_template(template_src)
-    html  = template.render(context_dict)
-    result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
-    if not pdf.err:
-        return HttpResponse(result.getvalue(), content_type='application/pdf')
-    return None
-
-
 @api_view(['POST'])
 def generate_invoice(request, *args, **kwargs):
     request_data = request.data
@@ -38,16 +28,19 @@ def generate_invoice(request, *args, **kwargs):
         "total_shareholders_equity": round(net_income + opening_balance_equity + owner_loan + retained_earnings,2),
         "total_liabilities_and_equity" : round(net_income + opening_balance_equity + owner_loan + retained_earnings,2)
     }
-   
-    pdf = render_to_pdf('basicapi/invoice.html', data)
 
     # force download
-    if pdf:
-        response = HttpResponse(pdf, content_type='application/pdf')
-        filename = "Invoice_%s.pdf" %(str(uuid.uuid4()))
-        content = "inline; filename='%s'" %(filename)
-        content = "attachment; filename=%s" %(filename)
-        print(content)
-        response['Content-Disposition'] = content
-        return response
-    return HttpResponse("Not found")
+    response = HttpResponse(content_type='application/pdf')
+    filename = "Invoice_%s.pdf" %(str(uuid.uuid4()))
+    content = "inline; filename='%s'" %(filename)
+    content = "attachment; filename=%s" %(filename)
+    response['Content-Disposition'] = content
+    template = get_template('basicapi/invoice.html')
+    html  = template.render(data)
+    pdf = pisa.CreatePDF(html, dest=response)
+
+    if pdf.err:
+        return HttpResponse('we had some error <pre>' + html + '</pre>')
+
+    return response
+    
