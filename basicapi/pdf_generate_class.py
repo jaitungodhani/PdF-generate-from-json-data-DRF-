@@ -2,7 +2,9 @@
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from io import BytesIO
-
+from reportlab.platypus import Table, TableStyle, Frame, Paragraph, Spacer, SimpleDocTemplate
+from reportlab.lib import colors
+from reportlab.lib.units import cm
 
 class BalanceSheet:
     def __init__(self, cash_in_bank, total_current_assets, total_assets, net_income, opening_balance_equity, \
@@ -137,5 +139,54 @@ class ProfitandLoss:
         pdf.save()
 
         buffer.seek(0)
+        
+        return buffer
+
+
+class AuthorDetails:
+    def __init__(self, data, title, documentTitle) -> None:
+        self.data = data
+        self.title = title
+        self.documentTitle = documentTitle
+
+    def main(self):
+        buffer = BytesIO()
+        pdf = canvas.Canvas(buffer)
+        pdf.setTitle(self.documentTitle)
+        pdf.setFont("Helvetica", 18)
+        pdf.drawCentredString(300, 808, self.title)
+        pdf.setFont("Helvetica", 12)
+        pdf.drawCentredString(300, 785, self.documentTitle)
+        pdf.line(30, 750, 550, 750)
+        pdf.drawString(35, 730, f"Author_ID :- {self.data['id']}")
+        pdf.drawString(35, 710, f"Author Details :- {self.data['name']}")
+        pdf.drawString(35, 690, f"Country :- {self.data['coutry']}")
+        pdf.drawString(35, 670, f"Address :- {self.data['address']}")
+        pdf.setFont("Helvetica-Bold", 12)
+        pdf.drawCentredString(300, 630, "Author Book Details")
+
+        doc = SimpleDocTemplate(pdf)
+        elements = []
+        tdata = [["name", "fname"], ["jaitun","Godhani"], ["jaitun","Godhani"], \
+                ["jaitun","Godhani"], ["jaitun","Godhani"],["jaitun","Godhani"],
+                ["jaitun","Godhani"], ["jaitun","Godhani"], ["jaitun","Godhani"],
+                ["jaitun","Godhani"], ["jaitun","Godhani"], ["jaitun","Godhani"],
+                ["jaitun","Godhani"], ["jaitun","Godhani"], ["jaitun","Godhani"]]
+        # elements.append(Table(tdata)) 
+        # doc.build(elements)
+        # f = Table(tdata)
+        t = Table(tdata, colWidths=[260,260])
+        tstyle = TableStyle([("GRID",(0,0),(-1,-1), 1,colors.black)])
+        t.setStyle(tstyle)
+        flow_obj = []
+        flow_obj.append(t)
+        doc.build(flow_obj)
+        # t.wrapOn(pdf, 550, 100)
+        # t.drawOn(pdf, 30, 100)
+        # pdf.showPage()
+        # pdf = pdf.getvalue()
+        pdf.save()
+
+        # buffer.seek(0)
         
         return buffer

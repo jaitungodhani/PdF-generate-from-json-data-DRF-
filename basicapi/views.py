@@ -3,9 +3,11 @@ from rest_framework.decorators import api_view
 import uuid
 from datetime import date
 from django.http import FileResponse
-from .pdf_generate_class import BalanceSheet, ProfitandLoss
+from .pdf_generate_class import BalanceSheet, ProfitandLoss, AuthorDetails
 from rest_framework.response import Response
 from rest_framework import status
+from .models import Author
+from .serializers import AuthorSeriliazer
 
 @api_view(['POST'])
 def generate_balance_sheet(request, *args, **kwargs):
@@ -59,7 +61,21 @@ def generate_profit_and_loss_sheet(request, *args, **kwargs):
     except Exception as e:
         return Response(f"error {str(e)} is coming", status = status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+def author_details(request, pk):
+    try:
+        author_all_obj = Author.objects.get(pk = pk)
+        serializers_data = AuthorSeriliazer(author_all_obj)
+        fileName = f"{str(uuid.uuid4())}.pdf"
+        documentTitle = 'Author Details'
+        title = 'PBCIX'
 
+        buffer = AuthorDetails(serializers_data.data, title, documentTitle)
+
+        return FileResponse(buffer.main(), as_attachment=True, filename=fileName)
+        
+    except Exception as e:
+        return Response(f"error {str(e)} is coming", status = status.HTTP_400_BAD_REQUEST)
 
 
 
