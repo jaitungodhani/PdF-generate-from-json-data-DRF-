@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 import uuid
 from datetime import date
 from django.http import FileResponse
-from .pdf_generate_class import BalanceSheet
+from .pdf_generate_class import BalanceSheet, ProfitandLoss
 
 @api_view(['POST'])
 def generate_balance_sheet(request, *args, **kwargs):
@@ -31,8 +31,25 @@ def generate_balance_sheet(request, *args, **kwargs):
 
     return FileResponse(buffer.generate_pdf(), as_attachment=True, filename=fileName)
 
+@api_view(['POST'])
+def generate_profit_and_loss_sheet(request, *args, **kwargs):
+    request_data = request.data
+   
+    revenue_general = request_data.get("revenue_general", 0.00)
+    commissions_and_fees = request_data.get("commissions_and_fees", 0.00)
+    office_expenses = request_data.get("office_expenses", 0.00)
+    other_selling_expenses = request_data.get("other_selling_expenses", 0.00)
+    from_date = request_data.get("from_date", "1 January, 2021")
+    to_date = request_data.get("to_date","2 January, 2023")
     
+    fileName = f"{str(uuid.uuid4())}.pdf"
+    documentTitle = 'Profit and Loss'
+    title = 'PBCIX'
 
+    buffer = ProfitandLoss(revenue_general, commissions_and_fees, office_expenses, other_selling_expenses, \
+                            from_date, to_date, title, documentTitle)
+
+    return FileResponse(buffer.generate_pdf(), as_attachment=True, filename=fileName)
 
 
 
