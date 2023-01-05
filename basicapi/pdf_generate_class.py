@@ -3,8 +3,10 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from io import BytesIO
 from reportlab.platypus import Table, TableStyle, Frame, Paragraph, Spacer, SimpleDocTemplate
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
-from reportlab.lib.units import cm
+from reportlab.lib.units import mm, inch, cm
+from reportlab.lib.pagesizes import A4
 
 class BalanceSheet:
     def __init__(self, cash_in_bank, total_current_assets, total_assets, net_income, opening_balance_equity, \
@@ -164,29 +166,43 @@ class AuthorDetails:
         pdf.drawString(35, 670, f"Address :- {self.data['address']}")
         pdf.setFont("Helvetica-Bold", 12)
         pdf.drawCentredString(300, 630, "Author Book Details")
-
-        doc = SimpleDocTemplate(pdf)
-        elements = []
-        tdata = [["name", "fname"], ["jaitun","Godhani"], ["jaitun","Godhani"], \
-                ["jaitun","Godhani"], ["jaitun","Godhani"],["jaitun","Godhani"],
-                ["jaitun","Godhani"], ["jaitun","Godhani"], ["jaitun","Godhani"],
-                ["jaitun","Godhani"], ["jaitun","Godhani"], ["jaitun","Godhani"],
-                ["jaitun","Godhani"], ["jaitun","Godhani"], ["jaitun","Godhani"]]
-        # elements.append(Table(tdata)) 
-        # doc.build(elements)
-        # f = Table(tdata)
-        t = Table(tdata, colWidths=[260,260])
-        tstyle = TableStyle([("GRID",(0,0),(-1,-1), 1,colors.black)])
-        t.setStyle(tstyle)
+        pdf.setFont("Helvetica", 12)
+        
+        tdata = [[i["name"], i["pub_year"], i["genre"]] for i in self.data['books']] #For data Format
+    
+        count_new = [0] + [i+27 for i in range(len(tdata) - 27) if i%40 == 0] # for number of records per page
         flow_obj = []
-        flow_obj.append(t)
-        doc.build(flow_obj)
-        # t.wrapOn(pdf, 550, 100)
-        # t.drawOn(pdf, 30, 100)
-        # pdf.showPage()
-        # pdf = pdf.getvalue()
+
+        for j in range(len(count_new)): # For Table generated from data
+            frame = Frame(10,40, 560, 570) if j == 0 else Frame(10,40, 560,780)
+
+            data1 = [["Name", "Pub Year", "Genre"]] #Table headers
+
+            if(j==len(count_new)-1):
+                for row in tdata[count_new[j]:]:
+                    data1.append(row)
+                table = Table(data1, colWidths=[125,50,375])
+                ts = TableStyle([("GRID", (0,0), (-1,-1), 2, colors.black)])
+                table.setStyle(ts)
+                flow_obj.append(Spacer(8,8))
+                flow_obj.append(table)
+                frame.addFromList(flow_obj, pdf)
+                pdf.drawString(500, 15, f"Page No - {j+1}")
+                pdf.showPage()
+            else:
+                for row in tdata[count_new[j]:count_new[j+1]]:
+                    data1.append(row)
+                table = Table(data1, colWidths=[125,50,375])
+                ts = TableStyle([("GRID", (0,0), (-1,-1), 2, colors.black)])
+                table.setStyle(ts)
+                flow_obj.append(Spacer(8,8))
+                flow_obj.append(table)
+                frame.addFromList(flow_obj, pdf)
+                pdf.drawString(500, 15, f"Page No - {j+1}")
+                pdf.showPage()
+
         pdf.save()
 
-        # buffer.seek(0)
+        buffer.seek(0)
         
         return buffer
