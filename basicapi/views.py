@@ -2,7 +2,7 @@
 from rest_framework.decorators import api_view
 import uuid
 from datetime import date
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from .pdf_generate_class import BalanceSheet, ProfitandLoss, AuthorDetails
 from rest_framework.response import Response
 from rest_framework import status
@@ -70,9 +70,13 @@ def author_details(request, pk):
         documentTitle = 'Author Details'
         title = 'PBCIX'
 
-        buffer = AuthorDetails(serializers_data.data, title, documentTitle)
+        # Set up response
+        response = HttpResponse(content_type='application/pdf')
+        pdf_name = "Author-%s.pdf" % fileName
+        response['Content-Disposition'] = 'attachment; filename=%s' % pdf_name
 
-        return FileResponse(buffer.main(), as_attachment=True, filename=fileName)
+        response = AuthorDetails(serializers_data.data, response, title, documentTitle)
+        return response.main()
         
     except Exception as e:
         return Response(f"error {str(e)} is coming", status = status.HTTP_400_BAD_REQUEST)

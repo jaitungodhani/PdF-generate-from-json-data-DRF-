@@ -1,12 +1,12 @@
 
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from io import BytesIO
+from io import StringIO, BytesIO
 from reportlab.platypus import Table, TableStyle, Frame, Paragraph, Spacer, SimpleDocTemplate
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.units import mm, inch, cm
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, letter
 
 class BalanceSheet:
     def __init__(self, cash_in_bank, total_current_assets, total_assets, net_income, opening_balance_equity, \
@@ -146,63 +146,58 @@ class ProfitandLoss:
 
 
 class AuthorDetails:
-    def __init__(self, data, title, documentTitle) -> None:
+    def __init__(self, data, response, title, documentTitle) -> None:
         self.data = data
+        self.response = response
         self.title = title
         self.documentTitle = documentTitle
 
-    def main(self):
-        buffer = BytesIO()
-        pdf = canvas.Canvas(buffer)
+    def addPageNumber(self, canvas, doc):
+        """
+        Add the page number
+        """
+        page_num = canvas.getPageNumber()
+        text = "Page No :- %s" % page_num
+        canvas.drawRightString(200*mm, 20*mm, text)
+
+    def onFirstPage(self, canvas, document):
+        pdf = canvas
         pdf.setTitle(self.documentTitle)
         pdf.setFont("Helvetica", 18)
-        pdf.drawCentredString(300, 808, self.title)
+        pdf.drawCentredString(300, 760, self.title)
         pdf.setFont("Helvetica", 12)
-        pdf.drawCentredString(300, 785, self.documentTitle)
-        pdf.line(30, 750, 550, 750)
-        pdf.drawString(35, 730, f"Author_ID :- {self.data['id']}")
-        pdf.drawString(35, 710, f"Author Details :- {self.data['name']}")
-        pdf.drawString(35, 690, f"Country :- {self.data['coutry']}")
-        pdf.drawString(35, 670, f"Address :- {self.data['address']}")
+        pdf.drawCentredString(300, 745, self.documentTitle)
+        pdf.line(30, 730, 550, 730)
+        pdf.drawString(35, 710, f"Author_ID :- {self.data['id']}")
+        pdf.drawString(35, 690, f"Author Details :- {self.data['name']}")
+        pdf.drawString(35, 670, f"Country :- {self.data['coutry']}")
+        pdf.drawString(35, 650, f"Address :- {self.data['address']}")
         pdf.setFont("Helvetica-Bold", 12)
         pdf.drawCentredString(300, 630, "Author Book Details")
         pdf.setFont("Helvetica", 12)
-        
-        tdata = [[i["name"], i["pub_year"], i["genre"]] for i in self.data['books']] #For data Format
+        self.addPageNumber(pdf, document)
+
+    def main(self):
+
+        buffer = BytesIO()
+
+        menu_pdf = SimpleDocTemplate(buffer, pagesize=letter)
+
+        data1 = [["Name", "Pub Year", "Genre"]] + [[i["name"], i["pub_year"], Paragraph(i["genre"])] for i in self.data['books']]
     
-        count_new = [0] + [i+27 for i in range(len(tdata) - 27) if i%40 == 0] # for number of records per page
-        flow_obj = []
+        t = Table(data1, colWidths=[125,50,375])
+        ts = TableStyle([("GRID", (0,0), (-1,-1), 2, colors.black)])
+        t.setStyle(ts)
+       
+        styles = getSampleStyleSheet()
+        elements = []
 
-        for j in range(len(count_new)): # For Table generated from data
-            frame = Frame(10,40, 560, 570) if j == 0 else Frame(10,40, 560,780)
+        elements.append(Paragraph('', styles['Title']))
+        elements.append(Spacer(4 * cm, 4 * cm))
+        elements.append(t)
+       
+        menu_pdf.build(elements, onFirstPage=self.onFirstPage, onLaterPages=self.addPageNumber)
+        self.response.write(buffer.getvalue())
+        buffer.close()
 
-            data1 = [["Name", "Pub Year", "Genre"]] #Table headers
-
-            if(j==len(count_new)-1):
-                for row in tdata[count_new[j]:]:
-                    data1.append(row)
-                table = Table(data1, colWidths=[125,50,375])
-                ts = TableStyle([("GRID", (0,0), (-1,-1), 2, colors.black)])
-                table.setStyle(ts)
-                flow_obj.append(Spacer(8,8))
-                flow_obj.append(table)
-                frame.addFromList(flow_obj, pdf)
-                pdf.drawString(500, 15, f"Page No - {j+1}")
-                pdf.showPage()
-            else:
-                for row in tdata[count_new[j]:count_new[j+1]]:
-                    data1.append(row)
-                table = Table(data1, colWidths=[125,50,375])
-                ts = TableStyle([("GRID", (0,0), (-1,-1), 2, colors.black)])
-                table.setStyle(ts)
-                flow_obj.append(Spacer(8,8))
-                flow_obj.append(table)
-                frame.addFromList(flow_obj, pdf)
-                pdf.drawString(500, 15, f"Page No - {j+1}")
-                pdf.showPage()
-
-        pdf.save()
-
-        buffer.seek(0)
-        
-        return buffer
+        return self.response
