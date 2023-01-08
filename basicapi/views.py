@@ -62,10 +62,10 @@ def generate_profit_and_loss_sheet(request, *args, **kwargs):
         return Response(f"error {str(e)} is coming", status = status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
-def author_details(request, pk):
+def author_details(request):
     try:
-        author_all_obj = Author.objects.get(pk = pk)
-        serializers_data = AuthorSeriliazer(author_all_obj)
+        author_all_obj = Author.objects.all()
+        serializers_data = AuthorSeriliazer(author_all_obj, many=True)
         fileName = f"{str(uuid.uuid4())}.pdf"
         documentTitle = 'Author Details'
         title = 'PBCIX'

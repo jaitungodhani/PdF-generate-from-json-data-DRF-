@@ -168,12 +168,12 @@ class AuthorDetails:
         pdf.setFont("Helvetica", 12)
         pdf.drawCentredString(300, 745, self.documentTitle)
         pdf.line(30, 730, 550, 730)
-        pdf.drawString(35, 710, f"Author_ID :- {self.data['id']}")
-        pdf.drawString(35, 690, f"Author Details :- {self.data['name']}")
-        pdf.drawString(35, 670, f"Country :- {self.data['coutry']}")
-        pdf.drawString(35, 650, f"Address :- {self.data['address']}")
-        pdf.setFont("Helvetica-Bold", 12)
-        pdf.drawCentredString(300, 630, "Author Book Details")
+        # pdf.drawString(35, 710, f"Author_ID :- {self.data['id']}")
+        # pdf.drawString(35, 690, f"Author Details :- {self.data['name']}")
+        # pdf.drawString(35, 670, f"Country :- {self.data['coutry']}")
+        # pdf.drawString(35, 650, f"Address :- {self.data['address']}")
+        # pdf.setFont("Helvetica-Bold", 12)
+        # pdf.drawCentredString(300, 630, "Author Book Details")
         pdf.setFont("Helvetica", 12)
         self.addPageNumber(pdf, document)
 
@@ -183,17 +183,25 @@ class AuthorDetails:
 
         menu_pdf = SimpleDocTemplate(buffer, pagesize=letter)
 
-        data1 = [["Name", "Pub Year", "Genre"]] + [[i["name"], i["pub_year"], Paragraph(i["genre"])] for i in self.data['books']]
+        data1 = [["Author", "Genre"]] + [[i["name"],[Paragraph(j["genre"]) for j in i['books']]] for i in self.data]
     
-        t = Table(data1, colWidths=[125,50,375])
-        ts = TableStyle([("GRID", (0,0), (-1,-1), 2, colors.black)])
+        t = Table(data1, colWidths=[175,375], splitInRow=1)
+        ts = TableStyle([("GRID", (0,0), (-1,-1), 2, colors.black),
+                        ('BACKGROUND',(0,0),(0,0),colors.limegreen),
+                        ('BACKGROUND',(1,0),(1,0),colors.khaki),
+                        ('VALIGN',(0,1),(0,len(data1)),'TOP'),
+                        ('BOX',(0,0),(-1,-1),2,colors.black),
+                        # ("LINEBELOW", (0, 'splitlast'), (-1, 'splitlast'), 2,colors.black),
+                        # ("LINEABOVE", (0, 'splitlast'), (-1, 'splitlast'), 2,colors.black)
+                        ]
+                        )
         t.setStyle(ts)
        
         styles = getSampleStyleSheet()
         elements = []
 
-        elements.append(Paragraph('', styles['Title']))
-        elements.append(Spacer(4 * cm, 4 * cm))
+        elements.append(Paragraph("Author's Books Details", styles['Title']))
+        elements.append(Spacer(1 * cm, 1 * cm))
         elements.append(t)
        
         menu_pdf.build(elements, onFirstPage=self.onFirstPage, onLaterPages=self.addPageNumber)

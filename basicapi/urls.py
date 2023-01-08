@@ -4,5 +4,5 @@ from .views import generate_balance_sheet, generate_profit_and_loss_sheet, autho
 urlpatterns = [
     path("balance_sheet/", generate_balance_sheet),
     path("profit_and_loss/", generate_profit_and_loss_sheet),
-    path("author_details/<str:pk>", author_details)
+    path("author_details/", author_details)
 ]
