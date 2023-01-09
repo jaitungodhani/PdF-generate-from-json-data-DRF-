@@ -66,7 +66,7 @@ def author_details(request):
     try:
         author_all_obj = Author.objects.all()
         serializers_data = AuthorSeriliazer(author_all_obj, many=True)
-        fileName = f"{str(uuid.uuid4())}.pdf"
+        fileName = f"{str(uuid.uuid4())}"
         documentTitle = 'Author Details'
         title = 'PBCIX'
 

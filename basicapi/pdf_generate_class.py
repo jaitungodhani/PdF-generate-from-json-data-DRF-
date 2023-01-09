@@ -145,20 +145,37 @@ class ProfitandLoss:
         return buffer
 
 
+class NumberedCanvas(canvas.Canvas):
+    def __init__(self, *args, **kwargs):
+        canvas.Canvas.__init__(self, *args, **kwargs)
+        self._saved_page_states = []
+
+    def showPage(self):
+        self._saved_page_states.append(dict(self.__dict__))
+        self._startPage()
+
+    def save(self):
+        """add page info to each page (page x of y)"""
+        num_pages = len(self._saved_page_states)
+        for state in self._saved_page_states:
+            self.__dict__.update(state)
+            self.draw_page_number(num_pages)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+
+    def draw_page_number(self, page_count):
+        self.setFont("Helvetica", 10)
+        self.drawCentredString(300, 20*mm,
+            "Generated for Peter by Ideeza")
+        self.drawRightString(200*mm, 20*mm,
+            "Page %d of %d" % (self._pageNumber, page_count))
+
 class AuthorDetails:
     def __init__(self, data, response, title, documentTitle) -> None:
         self.data = data
         self.response = response
         self.title = title
         self.documentTitle = documentTitle
-
-    def addPageNumber(self, canvas, doc):
-        """
-        Add the page number
-        """
-        page_num = canvas.getPageNumber()
-        text = "Page No :- %s" % page_num
-        canvas.drawRightString(200*mm, 20*mm, text)
 
     def onFirstPage(self, canvas, document):
         pdf = canvas
@@ -175,7 +192,7 @@ class AuthorDetails:
         # pdf.setFont("Helvetica-Bold", 12)
         # pdf.drawCentredString(300, 630, "Author Book Details")
         pdf.setFont("Helvetica", 12)
-        self.addPageNumber(pdf, document)
+        # self.addPageNumber(pdf, document)
 
     def main(self):
 
@@ -183,16 +200,15 @@ class AuthorDetails:
 
         menu_pdf = SimpleDocTemplate(buffer, pagesize=letter)
 
-        data1 = [["Author", "Genre"]] + [[i["name"],[Paragraph(j["genre"]) for j in i['books']]] for i in self.data]
+        data1 = [["Author", "Genre"]] + [[Paragraph(i["name"]),[Paragraph(j["genre"]) for j in i['books']]] for i in self.data]
     
-        t = Table(data1, colWidths=[175,375], splitInRow=1)
+        t = Table(data1, colWidths=[275,275], splitInRow=1)
         ts = TableStyle([("GRID", (0,0), (-1,-1), 2, colors.black),
                         ('BACKGROUND',(0,0),(0,0),colors.limegreen),
                         ('BACKGROUND',(1,0),(1,0),colors.khaki),
                         ('VALIGN',(0,1),(0,len(data1)),'TOP'),
+                        ('VALIGN',(0,2),(0,len(data1)),'TOP'),
                         ('BOX',(0,0),(-1,-1),2,colors.black),
-                        # ("LINEBELOW", (0, 'splitlast'), (-1, 'splitlast'), 2,colors.black),
-                        # ("LINEABOVE", (0, 'splitlast'), (-1, 'splitlast'), 2,colors.black)
                         ]
                         )
         t.setStyle(ts)
@@ -204,7 +220,7 @@ class AuthorDetails:
         elements.append(Spacer(1 * cm, 1 * cm))
         elements.append(t)
        
-        menu_pdf.build(elements, onFirstPage=self.onFirstPage, onLaterPages=self.addPageNumber)
+        menu_pdf.build(elements, onFirstPage=self.onFirstPage, canvasmaker=NumberedCanvas)
         self.response.write(buffer.getvalue())
         buffer.close()
 
