@@ -7,6 +7,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.units import mm, inch, cm
 from reportlab.lib.pagesizes import A4, letter
+from reportlab import rl_config
 
 class BalanceSheet:
     def __init__(self, cash_in_bank, total_current_assets, total_assets, net_income, opening_balance_equity, \
@@ -164,9 +165,11 @@ class NumberedCanvas(canvas.Canvas):
         canvas.Canvas.save(self)
 
     def draw_page_number(self, page_count):
-        # if page_count > 1:
-        #     if self._pageNumber != 1: self.line(30, 716, 582, 716) 
-        #     if self._pageNumber != page_count: self.line(30, 80, 582, 80)
+        self.setFillColor(colors.black)
+        self.setLineWidth(2)
+        if page_count > 1:
+            if self._pageNumber != 1: self.line(30, 716, 582, 716) 
+            if self._pageNumber != page_count: self.line(30, 80.5, 582, 80.5)
         self.setFont("Helvetica", 10)
         self.drawCentredString(300, 20*mm,
             "Generated for Peter by Ideeza")
@@ -181,13 +184,13 @@ class AuthorDetails:
         self.documentTitle = documentTitle
 
     def onFirstPage(self, canvas, document):
-        print(document)
         pdf = canvas
         pdf.setTitle(self.documentTitle)
         pdf.setFont("Helvetica", 18)
         pdf.drawCentredString(300, 760, self.title)
         pdf.setFont("Helvetica", 12)
         pdf.drawCentredString(300, 745, self.documentTitle)
+        
         pdf.line(30, 730, 582, 730)
         # pdf.drawString(35, 710, f"Author_ID :- {self.data['id']}")
         # pdf.drawString(35, 690, f"Author Details :- {self.data['name']}")
